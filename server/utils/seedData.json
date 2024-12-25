@@ -1,0 +1,44 @@
+{
+    "categories": [{ "name": "Fashion", "description": "Clothing and accessories", "isActive": true }],
+	"brands": [      { "name": "StyleHub", "description": "Trendy and stylish fashion", "isActive": true }],
+	"products": [
+      {
+        "sku": "P010",
+        "name": "MAGCOMSEN Men's Polo Shirts Short Sleeve",
+        "imageUrl": "https://m.media-amazon.com/images/I/81F-P85M7IL._AC_SX679_.jpg",
+        "description": "style: Classic polo shirts with 3-button placket and spread collar, a loop under the buttons suitable for hanging sunglasses or microphone, dual pen pockets on left sleeve for your convenience.",
+        "quantity": 70,
+        "price": 39.99,
+        "taxable": true,
+        "isActive": true,
+        "category": "Fashion",
+        "brand": "StyleHub"
+      },
+	  {
+        "sku": "P011",
+        "name": "Under Armour Men's New Freedom Flag T-Shirt",
+        "imageUrl": "https://m.media-amazon.com/images/I/51H2u5sBL1L._AC_SX679_.jpg",
+        "description": "Everyone makes graphic Ts..but Under Armour makes them better. The fabric we use is light, soft, and quick-drying. Super-soft, cotton-blend fabric provides all-day comfort. Ribbed collar. Loose: Fuller cut for complete comfort. 60% Cotton/40% Polyester..",
+        "quantity": 70,
+        "price": 49.99,
+        "taxable": true,
+        "isActive": true,
+        "category": "Fashion",
+        "brand": "StyleHub"
+      },
+	  {
+        "sku": "P012",
+        "name": "Button Down Regular Fit Long Sleeve Plaid Flannel Casual Shirts",
+        "imageUrl": "https://m.media-amazon.com/images/I/71xpzd0FFUL._AC_SX569_.jpg",
+        "description": "Produced By Soft Cotton Fabric Which Gives Most Comfortable Wear; Ideal match with casual pants;cargo pants;jeans etc.",
+        "quantity": 70,
+        "price": 69.99,
+        "taxable": true,
+        "isActive": true,
+        "category": "Fashion",
+        "brand": "StyleHub"
+      }
+      
+    ]
+  }
+  
