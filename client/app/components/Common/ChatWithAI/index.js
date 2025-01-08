@@ -19,24 +19,36 @@ const ChatWithAI = () => {
   const messagesEndRef = useRef(null);
 
   const searchProducts = async query => {
-    const searchTerms = query.toLowerCase().split(' ');
+    // Danh sách "stop words" hoặc "filler words" hay gặp
+    const fillerWords = ['i', 'am', 'has', 'a', 'the', 'of', 'to', 'for', 'is', 'was', 'need'];
 
-    // First try to match product names
+    // Tách và lọc những từ quá ngắn hoặc không cần thiết
+    let searchTerms = query
+      .toLowerCase()
+      .split(' ')
+      .filter(term => !fillerWords.includes(term) && term.length > 1);
+
+    if (searchTerms.length === 0) {
+      // Nếu không còn từ khóa, không hiển thị sản phẩm
+      return [];
+    }
+
+    // Tìm kiếm trong name
     let matchedProducts = products.filter(product => {
       const productName = product.name.toLowerCase();
-      return searchTerms.some(term => productName.includes(term));
+      // Phải khớp tất cả từ khóa (every), thay vì khớp bất kỳ (some)
+      return searchTerms.every(term => productName.includes(term));
     });
 
-    // If no name matches, try description
+    // Nếu không có gì khớp name, kiểm tra description
     if (matchedProducts.length === 0) {
       matchedProducts = products.filter(product => {
-        const searchText = product.description.toLowerCase();
-        return searchTerms.some(term => searchText.includes(term));
+        const productDesc = product.description.toLowerCase();
+        return searchTerms.every(term => productDesc.includes(term));
       });
     }
 
-    // Limit results to most relevant
-    return matchedProducts.slice(0, 2);
+    return matchedProducts;
   };
 
   const scrollToBottom = () => {
@@ -105,10 +117,7 @@ const ChatWithAI = () => {
       const aiResponse = data.candidates[0]?.content?.parts[0]?.text;
 
       // Only include products if they were specifically asked about
-      const shouldShowProducts =
-        inputMessage.toLowerCase().includes('shirt') ||
-        inputMessage.toLowerCase().includes('product') ||
-        inputMessage.toLowerCase().includes('buy');
+      const shouldShowProducts = matchedProducts.length > 0;
 
       setMessages(prev => [
         ...prev,
