@@ -37,8 +37,7 @@ const Homepage = () => {
 
   return (
     <div className='homepage'>
-      {/* Image Search Section */}
-      <div style={{ textAlign: 'center', margin: '20px 0' }}>
+      {/* <div style={{ textAlign: 'center', margin: '20px 0' }}>
         <button
           onClick={() => document.getElementById('fileInput').click()}
           style={{
@@ -62,7 +61,6 @@ const Homepage = () => {
           onChange={handleFileUpload}
         />
         {loading && <p>Loading... Please wait.</p>}
-        {/* Results Section */}
         <div style={{ marginTop: '20px' }}>
           {results.length > 0 ? (
             <div>
@@ -105,7 +103,7 @@ const Homepage = () => {
             !loading && <p>No matching products found.</p>
           )}
         </div>
-      </div>
+      </div> */}
 
       {/* Banners Section */}
       <Row className='flex-row'>

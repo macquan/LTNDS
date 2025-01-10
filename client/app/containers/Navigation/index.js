@@ -34,8 +34,22 @@ import { BarsIcon } from '../../components/Common/Icon';
 import MiniBrand from '../../components/Store//MiniBrand';
 import Menu from '../NavigationMenu';
 import Cart from '../Cart';
+import Sketchpad from '../Sketchpad';
+
+import { searchByImage } from '../Homepage/imageSearch';
+import './SearchResults.css';
 
 class Navigation extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.fileInputRef = React.createRef();
+    this.state = {
+      loading: false,
+      results: [], // Store search results
+      sketchMode: false, // Whether the sketchpad is open
+      sketchImage: null // Store the sketch image
+    };
+  }
   componentDidMount() {
     this.props.fetchStoreBrands();
     this.props.fetchStoreCategories();
@@ -50,6 +64,56 @@ class Navigation extends React.PureComponent {
     this.props.fetchStoreCategories();
     this.props.toggleMenu();
   }
+
+  handleSketchSearch = async () => {
+    if (!this.state.sketchImage) {
+      alert('Please draw something before searching!');
+      return;
+    }
+
+    this.setState({ loading: true, results: [] });
+
+    try {
+      // Convert data URL to a Blob to simulate a file input for `searchByImage`
+      const dataUrl = this.state.sketchImage;
+      const blob = await fetch(dataUrl).then(res => res.blob());
+      const file = new File([blob], 'sketch.png', { type: 'image/png' });
+
+      // Use the existing image search function
+      const results = await searchByImage(file);
+      console.log('Sketch Search Results:', results);
+
+      this.setState({ results });
+    } catch (error) {
+      console.error('Error during sketch search:', error);
+    } finally {
+      this.setState({ loading: false, sketchMode: false }); // Close sketchpad
+    }
+  };
+
+  handleSketchpadSave = sketchDataUrl => {
+    this.setState({ sketchImage: sketchDataUrl });
+    alert("Sketch saved! Click 'Search by Sketch' to find results.");
+  };
+
+  handleFileUpload = async event => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    this.setState({ loading: true, results: [] }); // Show loading and clear previous results
+
+    try {
+      const matches = await searchByImage(file); // Perform image search
+      console.log('Image Search Results:', matches);
+
+      // Update results in the component state
+      this.setState({ results: matches });
+    } catch (error) {
+      console.error('Error during image search:', error);
+    } finally {
+      this.setState({ loading: false });
+    }
+  };
 
   getSuggestionValue(suggestion) {
     return suggestion.name;
@@ -82,8 +146,8 @@ class Navigation extends React.PureComponent {
           <img
             className='item-image'
             src={`${suggestion.imageUrl
-                ? suggestion.imageUrl
-                : '/images/placeholder-image.png'
+              ? suggestion.imageUrl
+              : '/images/placeholder-image.png'
               }`}
           />
           <div>
@@ -125,6 +189,7 @@ class Navigation extends React.PureComponent {
       onSuggestionsFetchRequested,
       onSuggestionsClearRequested
     } = this.props;
+    const { loading, results, sketchMode } = this.state;
 
     const inputProps = {
       placeholder: 'Search Products',
@@ -190,18 +255,152 @@ class Navigation extends React.PureComponent {
               lg={{ size: 5, order: 2 }}
               className='pt-2 pt-lg-0'
             >
-              <Autosuggest
-                suggestions={suggestions}
-                onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-                onSuggestionsClearRequested={onSuggestionsClearRequested}
-                getSuggestionValue={this.getSuggestionValue}
-                renderSuggestion={this.renderSuggestion}
-                inputProps={inputProps}
-                onSuggestionSelected={(_, item) => {
-                  history.push(`/product/${item.suggestion.slug}`);
-                }}
-              />
+              <div className='search-container d-flex align-items-center'>
+                <Autosuggest
+                  suggestions={suggestions}
+                  onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+                  onSuggestionsClearRequested={onSuggestionsClearRequested}
+                  getSuggestionValue={this.getSuggestionValue}
+                  renderSuggestion={this.renderSuggestion}
+                  inputProps={{
+                    placeholder: 'Search Products',
+                    value: searchValue,
+                    onChange: (_, { newValue }) => onSearch(newValue)
+                  }}
+                  onSuggestionSelected={(_, item) => {
+                    history.push(`/product/${item.suggestion.slug}`);
+                  }}
+                />
+
+                {/* Image Search Button */}
+                {/* <button
+                  className='btn btn-outline-secondary ml-2'
+                  onClick={() => this.fileInputRef.current.click()}
+                  aria-label='Search with Image'
+                >
+                  <i className='fa fa-camera' />
+                </button>
+                <input
+                  type='file'
+                  accept='image/*'
+                  style={{ display: 'none' }}
+                  ref={this.fileInputRef}
+                  onChange={this.handleFileUpload}
+                /> */}
+
+                {/* Voice Search Button */}
+                {/* <button
+                  className='btn btn-outline-secondary ml-2'
+                  onClick={this.handleVoiceSearch}
+                  aria-label='Search with Voice'
+                >
+                  <i className='fa fa-microphone' />
+                </button> */}
+
+                {/* Sketch Search Button */}
+                <button
+                  className='btn btn-outline-secondary ml-2'
+                  onClick={() => this.setState({ sketchMode: true })}
+                  aria-label='Search by Sketch'
+                >
+                  <i className='fa fa-pencil' />
+                </button>
+
+                {/* Sketchpad Modal */}
+                {sketchMode && (
+                  <div className='sketchpad-modal'>
+                    <h3>Draw Your Design</h3>
+                    <Sketchpad onSave={this.handleSketchpadSave} />
+                    <button
+                      className='btn btn-primary'
+                      onClick={this.handleSketchSearch}
+                    >
+                      Search by Sketch
+                    </button>
+                    <button
+                      className='btn btn-secondary'
+                      onClick={() => this.setState({ sketchMode: false })}
+                    >
+                      Close
+                    </button>
+                  </div>
+                )}
+
+                {/* Camera Button */}
+                <button
+                  className='btn btn-outline-secondary ml-2'
+                  onClick={() => this.fileInputRef.current.click()}
+                  aria-label='Search with Image'
+                >
+                  <i className='fa fa-camera' />
+                </button>
+                <input
+                  type='file'
+                  accept='image/*'
+                  style={{ display: 'none' }}
+                  ref={this.fileInputRef}
+                  onChange={this.handleFileUpload}
+                />
+
+                {loading && (
+                  <div className='spinner-border text-primary' role='status'>
+                    <span className='sr-only'>Loading...</span>
+                  </div>
+                )}
+
+                {/* Results Section */}
+                {/* {results.length > 0 && (
+                  <div className='search-results'>
+                    <h4>Matching Products:</h4>
+                    <ul>
+                      {results.map(product => (
+                        <li key={product.slug}>
+                          <a href={`/product/${product.slug}`}>
+                            <img
+                              src={product.imageUrl}
+                              alt={product.name}
+                              style={{
+                                width: '50px',
+                                marginRight: '10px',
+                                verticalAlign: 'middle'
+                              }}
+                            />
+                            {product.name}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>{' '}
+                  </div>
+                )} */}
+                {/* Display Results Below */}
+                {results.length > 0 && (
+                  <div className='search-results-dropdown'>
+                    <ul>
+                      {results.map(product => (
+                        <li key={product.slug}>
+                          <a
+                            href={`/product/${product.slug}`}
+                            className='dropdown-item'
+                          >
+                            <img
+                              src={product.imageUrl}
+                              alt={product.name}
+                              style={{
+                                width: '40px',
+                                marginRight: '10px',
+                                verticalAlign: 'middle'
+                              }}
+                            />
+                            {product.name} - ${product.price}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </Col>
+
             <Col
               xs={{ size: 12, order: 2 }}
               sm={{ size: 12, order: 2 }}
